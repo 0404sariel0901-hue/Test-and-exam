@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam & Test Score Calculator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 0 15px;
+      background-color: #f7f9fc;
+      color: #333;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .section-header {
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+      color: #2c3e50;
+    }
+    .subject-block {
+      background: #ffffff;
+      padding: 12px 15px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .subject-title {
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    .paper-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .paper-row label {
+      width: 140px;
+      font-size: 0.9rem;
+    }
+    .paper-row input {
+      width: 70px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f8f5;
+      border: 1px solid #a3e4d7;
+      border-radius: 8px;
+      display: none;
+    }
+    .summary-item {
+      margin: 6px 0;
+      font-size: 0.95rem;
+    }
+    .grand-total {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #16a085;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Exam & Test Score Calculator</h1>
+
+  <!-- Section 1: Multi-Paper Core Subjects -->
+  <h2 class="section-header">Core Exam Subjects</h2>
+  
+  <div class="subject-block">
+    <div class="subject-title">English (Weight: 3x)</div>
+    <div class="paper-row">
+      <label>Paper 1 (40%):</label>
+      <input type="number" id="eng_p1_mark" placeholder="Mark"> /
+      <input type="number" id="eng_p1_full" placeholder="Full">
+    </div>
+    <div class="paper-row">
+      <label>Paper 2 (30%):</label>
+      <input type="number" id="eng_p2_mark" placeholder="Mark"> /
+      <input type="number" id="eng_p2_full" placeholder="Full">
+    </div>
+    <div class="paper-row">
+      <label>Paper 3 (30%):</label>
+      <input type="number" id="eng_p3_mark" placeholder="Mark"> /
+      <input type="number" id="eng_p3_full" placeholder="Full">
+    </div>
+  </div>
+
+  <div class="subject-block">
+    <div class="subject-title">Chinese (Weight: 3x)</div>
+    <div class="paper-row">
+      <label>Paper 1 (50%):</label>
+      <input type="number" id="chin_p1_mark" placeholder="Mark"> /
+      <input type="number" id="chin_p1_full" placeholder="Full">
+    </div>
+    <div class="paper-row">
+      <label>Paper 2 (50%):</label>
+      <input type="number" id="chin_p2_mark" placeholder="Mark"> /
+      <input type="number" id="chin_p2_full" placeholder="Full">
+    </div>
+  </div>
+
+  <div class="subject-block">
+    <div class="subject-title">Mathematics (Weight: 3x)</div>
+    <div class="paper-row">
+      <label>Paper 1 (65%):</label>
+      <input type="number" id="math_p1_mark" placeholder="Mark"> /
+      <input type="number" id="math_p1_full" placeholder="Full">
+    </div>
+    <div class="paper-row">
+      <label>Paper 2 (35%):</label>
+      <input type="number" id="math_p2_mark" placeholder="Mark"> /
+      <input type="number" id="math_p2_full" placeholder="Full">
+    </div>
+  </div>
+
+  <!-- Section 2: Dynamic Electives -->
+  <h2 class="section-header">Elective Subjects</h2>
+  <div id="single-paper-subjects"></div>
+
+  <!-- Section 3: Test Scores -->
+  <h2 class="section-header">Test Scores</h2>
+  <div id="testContainer"></div>
+
+  <button onclick="calculateAllScores()">Calculate Overall Total Score</button>
+
+  <div id="result">
+    <h2>Results Breakdown</h2>
+    <div id="subject-breakdown"></div>
+    <hr>
+    <h3 id="grand-total" class="grand-total"></h3>
+  </div>
+
+  <script>
+    // Configurable Electives (Single Paper)
+    const electives = [
+      { name: 'Physics', weight: 1 },
+      { name: 'Chemistry', weight: 1 },
+      { name: 'Biology', weight: 1 },
+      { name: 'Economics', weight: 1 },
+      { name: 'Geography', weight: 1 },
+      { name: 'Citizenship & Social Development (CES)', weight: 1 },
+      { name: 'ICT', weight: 0.5 },
+      { name: 'Putonghua (PTH)', weight: 0.5 }
+    ];
+
+    // Configurable General Tests (Updated core test weights to 3x)
+    const tests = [
+      { id: 'test_eng', name: 'English Test', weight: 3 },
+      { id: 'test_chin', name: 'Chinese Test', weight: 3 },
+      { id: 'test_math', name: 'Math Test', weight: 3 },
+      { id: 'test_sci', name: 'Science Test', weight: 1 }
+    ];
+
+    // Generate Electives Input Fields
+    const electivesContainer = document.getElementById('single-paper-subjects');
+    electives.forEach(sub => {
+      const id = sub.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const div = document.createElement('div');
+      div.className = 'subject-block';
+      div.innerHTML = `
+        <div class="subject-title">${sub.name} (Weight: ${sub.weight}x)</div>
+        <div class="paper-row">
+          <label>Score:</label>
+          <input type="number" id="${id}_mark" placeholder="Mark" min="0"> /
+          <input type="number" id="${id}_full" placeholder="Full" min="1">
+        </div>
+      `;
+      electivesContainer.appendChild(div);
+    });
+
+    // Generate Test Score Input Fields
+    const testContainer = document.getElementById('testContainer');
+    tests.forEach(test => {
+      const div = document.createElement('div');
+      div.className = 'subject-block';
+      div.innerHTML = `
+        <div class="subject-title">${test.name} (Weight: ${test.weight}x)</div>
+        <div class="paper-row">
+          <label>Score:</label>
+          <input type="number" id="${test.id}_mark" placeholder="Mark" min="0"> /
+          <input type="number" id="${test.id}_full" placeholder="Full" min="1">
+        </div>
+      `;
+      testContainer.appendChild(div);
+    });
+
+    function getVal(id) {
+      const val = parseFloat(document.getElementById(id).value);
+      return isNaN(val) ? 0 : val;
+    }
+
+    function calculateAllScores() {
+      let totalWeightedScore = 0;
+      let breakdownHtml = '';
+
+      // 1. English Exam
+      const engP1 = getVal('eng_p1_full') > 0 ? (getVal('eng_p1_mark') / getVal('eng_p1_full')) * 40 : 0;
+      const engP2 = getVal('eng_p2_full') > 0 ? (getVal('eng_p2_mark') / getVal('eng_p2_full')) * 30 : 0;
+      const engP3 = getVal('eng_p3_full') > 0 ? (getVal('eng_p3_mark') / getVal('eng_p3_full')) * 30 : 0;
+      const engPercent = engP1 + engP2 + engP3;
+      const engWeighted = engPercent * 3;
+      totalWeightedScore += engWeighted;
+      breakdownHtml += `<div class="summary-item"><strong>English Exam:</strong> ${engPercent.toFixed(2)}% | Weighted: ${engWeighted.toFixed(2)}</div>`;
+
+      // 2. Chinese Exam
+      const chinP1 = getVal('chin_p1_full') > 0 ? (getVal('chin_p1_mark') / getVal('chin_p1_full')) * 50 : 0;
+      const chinP2 = getVal('chin_p2_full') > 0 ? (getVal('chin_p2_mark') / getVal('chin_p2_full')) * 50 : 0;
+      const chinPercent = chinP1 + chinP2;
+      const chinWeighted = chinPercent * 3;
+      totalWeightedScore += chinWeighted;
+      breakdownHtml += `<div class="summary-item"><strong>Chinese Exam:</strong> ${chinPercent.toFixed(2)}% | Weighted: ${chinWeighted.toFixed(2)}</div>`;
+
+      // 3. Math Exam
+      const mathP1 = getVal('math_p1_full') > 0 ? (getVal('math_p1_mark') / getVal('math_p1_full')) * 65 : 0;
+      const mathP2 = getVal('math_p2_full') > 0 ? (getVal('math_p2_mark') / getVal('math_p2_full')) * 35 : 0;
+      const mathPercent = mathP1 + mathP2;
+      const mathWeighted = mathPercent * 3;
+      totalWeightedScore += mathWeighted;
+      breakdownHtml += `<div class="summary-item"><strong>Math Exam:</strong> ${mathPercent.toFixed(2)}% | Weighted: ${mathWeighted.toFixed(2)}</div>`;
+
+      // 4. Elective Subjects
+      electives.forEach(sub => {
+        const id = sub.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const mark = getVal(`${id}_mark`);
+        const full = getVal(`${id}_full`);
+        const percent = full > 0 ? (mark / full) * 100 : 0;
+        const weighted = percent * sub.weight;
+        totalWeightedScore += weighted;
+        breakdownHtml += `<div class="summary-item"><strong>${sub.name}:</strong> ${percent.toFixed(2)}% | Weighted: ${weighted.toFixed(2)}</div>`;
+      });
+
+      // 5. Test Scores (Calculates with updated weights)
+      tests.forEach(test => {
+        const mark = getVal(`${test.id}_mark`);
+        const full = getVal(`${test.id}_full`);
+        const percent = full > 0 ? (mark / full) * 100 : 0;
+        const weighted = percent * test.weight;
+        totalWeightedScore += weighted;
+        breakdownHtml += `<div class="summary-item"><strong>${test.name}:</strong> ${percent.toFixed(2)}% | Weighted: ${weighted.toFixed(2)}</div>`;
+      });
+
+      // Display Final Results
+      document.getElementById('subject-breakdown').innerHTML = breakdownHtml;
+      document.getElementById('grand-total').innerText = `Grand Total Score: ${totalWeightedScore.toFixed(2)}`;
+      document.getElementById('result').style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
